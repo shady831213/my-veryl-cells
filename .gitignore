@@ -1,0 +1,6 @@
+.run/
+.build/
+target/
+dependencies/
+*.f
+*.vcd

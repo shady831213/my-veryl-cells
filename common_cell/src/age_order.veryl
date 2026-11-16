@@ -1,0 +1,60 @@
+// Pairwise insertion order, independent of row liveness. Only one bit per
+// unordered pair is stored; the reverse relation is its complement. A new
+// insertion becomes newer than every other row. Callers mask unoccupied rows.
+pub module AgeOrder::<ENTRIES: u32 = 4> (
+    clk   : input  clock                             ,
+    rst_n : input  reset_async_low                   ,
+    insert: input  logic          <ENTRIES>          ,
+    older : output logic          <ENTRIES> [ENTRIES],
+) {
+    initial {
+        if ENTRIES <: 2 {
+            $fatal(1, "AGE_ORDER_AT_LEAST_TWO");
+        }
+    }
+    for i in 0..ENTRIES :g_row {
+        for j in 0..ENTRIES :g_column {
+            if i <: j :g_pair {
+                var i_older: logic;
+                always_ff (clk, rst_n) {
+                    if_reset {
+                        i_older = 1;
+                    } else if insert[i] || insert[j] {
+                        i_older = !insert[i];
+                    }
+                }
+                assign older[j][i] = i_older;
+                assign older[i][j] = !i_older;
+            }
+            if i == j :g_self {
+                assign older[i][j] = 0;
+            }
+        }
+    }
+}
+
+// Multiple independent selectors use the same insertion history, without
+// duplicating its registers. Each result is zero/one-hot for a legal history.
+pub package AgeSelect::<ENTRIES: u32> {
+    type Mask       = logic<ENTRIES>          ;
+    function oldest (
+        candidates: input Mask                    ,
+        older     : input Mask           [ENTRIES],
+    ) -> Mask {
+        var result: Mask;
+        for i in 0..ENTRIES {
+            result[i] = candidates[i] && (candidates & older[i]) == 0;
+        }
+        return result;
+    }
+    function newest (
+        candidates: input Mask          ,
+        older     : input Mask [ENTRIES],
+    ) -> Mask {
+        var result: Mask;
+        for i in 0..ENTRIES {
+            result[i] = candidates[i] && (candidates & ~older[i] & ~((1 as Mask) << i)) == 0;
+        }
+        return result;
+    }
+}

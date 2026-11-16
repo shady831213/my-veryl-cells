@@ -1,0 +1,67 @@
+#[test(age_order)]
+module AgeOrderTest {
+    alias package Age = common_cell::AgeSelect::<8>;
+    inst clk: $tb::clock_gen #( period: 10 );
+    inst rst: $tb::reset_gen ( clk );
+    var insert         : logic<8>    ;
+    var older          : logic<8> [8];
+    var candidates     : logic<8>    ;
+    var oldest         : logic<8>    ;
+    var newest         : logic<8>    ;
+    var stamp          : u32      [8];
+    var min_stamp      : u32         ;
+    var max_stamp      : u32         ;
+    var expected_oldest: logic<8>    ;
+    var expected_newest: logic<8>    ;
+    inst dut: common_cell::AgeOrder::<8> (
+        clk        ,
+        rst_n : rst,
+        insert     ,
+        older      ,
+    );
+    assign oldest = Age::oldest(candidates, older);
+    assign newest = Age::newest(candidates, older);
+
+    function compare_all_subsets () {
+        for mask in 0..256 {
+            candidates      = mask as 8;
+            min_stamp       = 32'hffffffff;
+            max_stamp       = 0;
+            expected_oldest = 0;
+            expected_newest = 0;
+            for row in 0..8 {
+                if candidates[row] && stamp[row] <: min_stamp {
+                    min_stamp       = stamp[row];
+                    expected_oldest = 8'b1 << row;
+                }
+                if candidates[row] && stamp[row] >: max_stamp {
+                    max_stamp       = stamp[row];
+                    expected_newest = 8'b1 << row;
+                }
+            }
+            $assert(oldest == expected_oldest, "AGE_OLDEST_TIMESTAMP_ORACLE");
+            $assert(newest == expected_newest, "AGE_NEWEST_TIMESTAMP_ORACLE");
+        }
+    }
+    initial {
+        insert     = 0;
+        candidates = 0;
+        for row in 0..8 {
+            stamp[row] = row + 1;
+        }
+        rst.assert();
+        clk.next(3);
+        compare_all_subsets();
+        // Reinsert physical rows in a nonnumeric order, including identities
+        // reused many times. The oracle stores timestamps, not a pair matrix.
+        for iteration in 0..32 {
+            insert = 8'b1 << ((iteration * 5 + 3) % 8);
+            clk.next();
+            insert                         = 0;
+            stamp[(iteration * 5 + 3) % 8] = iteration + 16;
+            compare_all_subsets();
+        }
+        $display("AGE_ORDER_PASS subsets=8448");
+        $finish();
+    }
+}
