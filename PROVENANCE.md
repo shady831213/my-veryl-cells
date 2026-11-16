@@ -8,6 +8,9 @@ Initial extraction, 2026-11-16:
   `common_cell/README.md`; it predates PDMA's added CDC cells.
 - `common_cell/src/age_order.veryl` and its native test from
   [pcie_modeling 1bfc188](https://github.com/shady831213/pcie_modeling/tree/1bfc188/rtl/common_cell).
+- The slice timing/storage and selection/age contracts from that project's
+  common-cell README are retained under `common_cell/docs`. Consumer-specific
+  chronology and retired Port examples stay in their original Git history.
 
 The shared twelve common-cell implementation files, eight common test/support
 files and seven generic-provider implementation/test files had identical bytes

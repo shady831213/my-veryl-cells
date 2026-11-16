@@ -31,6 +31,11 @@ timeouts or explicit drain checks supply liveness/end-of-test completion checkin
 
 ## Boundaries and use
 
+Detailed physical contracts are retained in [ready/valid slice timing](docs/ready-valid-slice.md)
+and [bounded selection and insertion age](docs/selection.md), including edge
+traces, simultaneous-event priority, storage costs and caller obligations.
+Paths inside those descriptions are relative to this common-cell project.
+
 | Cells | Contract |
 | --- | --- |
 | `ReadyValidSlice` | Typed single-clock Bypass/Forward/Reverse/Full transport |
