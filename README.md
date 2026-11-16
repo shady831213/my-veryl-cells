@@ -13,8 +13,12 @@ selection, instance bindings and physical qualification. Loading a constraint
 package does not apply exceptions or waive findings. Optional resource declarations
 do not require a particular project flow or the `my-veryl` repository.
 
-Use a compatible Veryl compiler on PATH. For the initial imported baseline,
-the tested compiler recipes are documented in [qualification](QUALIFICATION.md).
+Use a compatible Veryl compiler on PATH. Local development of the two packages
+uses native root dependency overrides and currently requires the temporary
+`0.22.1-generic-wide-struct-override` recipe from
+[my-veryl](https://github.com/shady831213/my-veryl), or an upstream compiler with
+the corresponding fix. Published consumption does not use those local overrides
+and keeps each project's qualified compiler. See [qualification](QUALIFICATION.md).
 The library does not download a compiler or change its consumer's toolchain.
 
 ```sh
@@ -26,6 +30,18 @@ VERYL_DUT_REUSE=0 veryl test
 
 Sources and unit tests retain native project discovery and dependencies. No
 generated project manifests, copied test source trees or custom RTL filelists.
+Consumers use the native published versions and commit their generated lockfile:
+
+```toml
+[dependencies]
+common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0"}
+tech_cell_generic = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0"}
+```
+
+The common-cell test project explicitly overrides both packages to this checkout,
+using Veryl's native root-only development override. Published consumers do not
+inherit those local paths. Providers depend on the published common contract;
+`Veryl.pub` records release commits. Global registry registration is disabled.
 See [cell contracts](common_cell/README.md), [generic providers](tech_cell/generic/README.md)
 and [provenance](PROVENANCE.md). Reuse is explicit and versioned, never an automatic
 sync from a consumer checkout. Generic RAM simulation or synthesis is not macro PPA.
