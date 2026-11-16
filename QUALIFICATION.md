@@ -39,9 +39,10 @@ regressions. Metadata confirmed the two actual local package paths and coherent
 edges. Each developer must use a compiler supporting that native override form;
 an older consumer recipe is not automatically sufficient for library development.
 
-Run ordinary native tests from `common_cell/tests` and `tech_cell/generic` with
-explicit `VERYL_DUT_REUSE=0`. Test the two existing compiler recipes independently;
-do not silently switch a consuming project to the three-patch recipe. Shared
+Run ordinary native development tests from `common_cell/tests` and
+`tech_cell/generic` with the override-capable compiler and explicit
+`VERYL_DUT_REUSE=0`. Qualify published consumers separately with their own recipes;
+do not silently upgrade them to the library-development recipe. Shared
 constraints and checkers still require an integrating project's actual objects,
 clocks and reset policy. No new physical CDC/RDC, macro timing, synthesis, power
 or complete Port/DMA qualification is claimed by library tests.
