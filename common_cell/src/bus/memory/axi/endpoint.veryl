@@ -67,14 +67,14 @@ pub module AxiMemoryMaster::<
     var cursor  : logic   ;
     var selected: logic<2>;
     var ready   : logic   ;
-    assign selected        = common_cell::RoundRobin::<2>::select({writes.returned, reads.returned}, cursor);
+    assign selected        = RoundRobin::<2>::select({writes.returned, reads.returned}, cursor);
     assign reads.accepted  = selected[0] && ready;
     assign writes.accepted = selected[1] && ready;
     // Register the merged receipt; a newly arriving contender cannot replace a
     // receipt already offered under downstream backpressure.
-    inst result: common_cell::ReadyValidSlice #(
+    inst result: ReadyValidSlice #(
         TYPE: M::Receipt                                 ,
-        MODE: common_cell::ReadyValid::SliceMode::Forward,
+        MODE: ReadyValid::SliceMode::Forward,
     ) (
         clk                                                      ,
         rst_n                                                    ,

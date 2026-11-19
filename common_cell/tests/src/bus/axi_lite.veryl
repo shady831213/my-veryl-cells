@@ -4,8 +4,8 @@ module RegisterFrontendTest {
     inst clk : $tb::clock_gen #( period: 10 );
     inst rst : $tb::reset_gen ( clk );
     inst axi : $std::axi4_lite_if::<B>;
-    inst core: bus_cell::RegisterPort #( REQUEST: bus_cell::RegisterBus::<48>::Request );
-    inst dut: bus_cell::AxiLiteRegisterFrontend::<B> (
+    inst core: common_cell::RegisterPort #( REQUEST: common_cell::RegisterBus::<48>::Request );
+    inst dut: common_cell::AxiLiteRegisterFrontend::<B> (
         clk       ,
         rst_n: rst,
         axi       ,
@@ -59,9 +59,9 @@ module RegisterFrontendTest {
         clk.next();
         core.request_ready  = 0;
         core.response_valid = 1;
-        core.response       = bus_cell::RegisterBus::Response'{
+        core.response       = common_cell::RegisterBus::Response'{
             data               : 64'h5678_00000000             ,
-            status             : bus_cell::RegisterBus::SUCCESS
+            status             : common_cell::RegisterBus::SUCCESS
         };
         $assert(core.response_ready, "READ_RESPONSE_CREDIT");
         clk.next();
@@ -74,11 +74,11 @@ module RegisterFrontendTest {
         clk.next();
         core.request_ready  = 0;
         core.response_valid = 1;
-        core.response       = bus_cell::RegisterBus::Response'{data: 0, status: bus_cell::RegisterBus::ACCESS_ERROR};
+        core.response       = common_cell::RegisterBus::Response'{data: 0, status: common_cell::RegisterBus::ACCESS_ERROR};
         clk.next();
         core.response_valid = 0;
         clk.next(3);
-        $assert(axi.bvalid && (axi.bresp as 2) == bus_cell::RegisterBus::ACCESS_ERROR, "WRITE_ERROR_HELD");
+        $assert(axi.bvalid && (axi.bresp as 2) == common_cell::RegisterBus::ACCESS_ERROR, "WRITE_ERROR_HELD");
         $assert(axi.rvalid && !core.request_valid, "NO_REPEATED_EFFECT");
         axi.bready = 1;
         axi.rready = 1;

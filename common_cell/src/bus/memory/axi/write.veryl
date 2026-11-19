@@ -128,9 +128,9 @@ module AxiMemoryWrite::<
         i_data       : port.request.tag ,
         o_data       : tag              ,
     );
-    inst receipt: common_cell::ReadyValidSlice #(
+    inst receipt: ReadyValidSlice #(
         TYPE: M::Receipt                                 ,
-        MODE: common_cell::ReadyValid::SliceMode::Forward,
+        MODE: ReadyValid::SliceMode::Forward,
     ) (
         clk                       ,
         rst_n                     ,

@@ -49,9 +49,9 @@ pub module AxiLiteRegisterFrontend::<B: $std::axi4_lite_prototype> (
     let dispatch      : logic           = !active && ((aw_full && w_full) || ar_full);
 
     // Transport owns held beats; AXI credit still lasts until the matching response.
-    inst aw_storage: common_cell::ReadyValidSlice #(
+    inst aw_storage: ReadyValidSlice #(
         TYPE: AddressBeat                                ,
-        MODE: common_cell::ReadyValid::SliceMode::Forward,
+        MODE: ReadyValid::SliceMode::Forward,
     ) (
         clk                                                            ,
         rst_n                                                          ,
@@ -63,9 +63,9 @@ pub module AxiLiteRegisterFrontend::<B: $std::axi4_lite_prototype> (
         m_data  : aw_head                                              ,
         occupied: _                                                    ,
     );
-    inst w_storage: common_cell::ReadyValidSlice #(
+    inst w_storage: ReadyValidSlice #(
         TYPE: WriteBeat                                  ,
-        MODE: common_cell::ReadyValid::SliceMode::Forward,
+        MODE: ReadyValid::SliceMode::Forward,
     ) (
         clk                                                                ,
         rst_n                                                              ,
@@ -77,9 +77,9 @@ pub module AxiLiteRegisterFrontend::<B: $std::axi4_lite_prototype> (
         m_data  : w_head                                                   ,
         occupied: _                                                        ,
     );
-    inst ar_storage: common_cell::ReadyValidSlice #(
+    inst ar_storage: ReadyValidSlice #(
         TYPE: AddressBeat                                ,
-        MODE: common_cell::ReadyValid::SliceMode::Forward,
+        MODE: ReadyValid::SliceMode::Forward,
     ) (
         clk                                                            ,
         rst_n                                                          ,

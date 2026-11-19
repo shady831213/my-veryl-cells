@@ -16,6 +16,14 @@ The request carries the byte address, write flag, 64 data bits, eight byte enabl
 - Each accepted request produces one terminal receipt with the original tag. Reads return dense bytes in address order. Writes reserve separate address, data and response tracking together. Reads and writes can finish independently. The receipt merge retains a selected result under backpressure. The caller retains tag ownership until receipt acceptance.
 - Supply combinational `read_attributes` and `write_attributes` from the current R and B signals. Tie both inputs to zero for an ordinary target without a response-sideband policy. The master samples a classification only on its response beat. A non-OKAY response sets `failed`; `retryable` is true when every failing beat is classified retryable. Unexpected ID, EXOKAY, a length/RLAST mismatch or a caller-classified invalid encoding sets `protocol_error`. Read retirement follows an accepted RLAST. A missing terminal response requires system-level recovery.
 
-The endpoints and their storage run in a single clock domain. The package exports the passive `bus_cell_properties::held_until_accepted` assertion for individual request or receipt channels. The integrating design binds it at its clock/reset and owns CDC, identity mapping, fairness across clients and lifecycle policy.
+### Transfer order and buffering
 
-Run `veryl test` in `bus_cell/tests` for independent address/data backpressure, byte-lane packing, opaque tag and USER propagation, and mixed-error burst classification.
+One request handshake issues one AXI burst. The caller splits a longer transfer at burst and 4 KiB boundaries before admission. One receipt handshake returns the tag, status and, for reads, the complete burst payload.
+
+All AR transactions use ID zero. Several reads can be outstanding; one tracker FIFO records their tags and geometry. The R lane assembles one burst at a time into a full-burst accumulator and pops the tracker at the accepted RLAST. It cannot interleave data from different transactions. A nonzero RID sets `protocol_error`. A completed read may occupy the read receipt slice and then the shared output slice while the caller is stalled.
+
+Each accepted write enqueues one full burst in a data FIFO of depth `WRITE_OUTSTANDING`. Its head drives W beat by beat and is released at the accepted WLAST. The separate address and response queues retain AW attributes and the completion tag for their own lifetimes. All AW transactions also use ID zero and B responses retire in AW order. Read and write receipts share a round-robin output and may overtake one another across directions. The caller owns any storage needed across transactions, such as a copy buffer retained for replay.
+
+The endpoints and their storage run in a single clock domain. The package exports the passive `common_cell_ready_valid_properties::held_until_accepted` assertion for individual request or receipt channels. The integrating design binds it at its clock/reset and owns CDC, identity mapping, fairness across clients and lifecycle policy.
+
+Run `veryl test` in `common_cell/tests` for independent address/data backpressure, byte-lane packing, opaque tag and USER propagation, and mixed-error burst classification.

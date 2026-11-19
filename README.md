@@ -3,8 +3,8 @@
 Reusable Veryl cells and their observable contracts. Native projects:
 
 - `common_cell`: typed slices, bounded selection, age ordering, RAM contracts
-  and provider wrappers, acknowledged CDC mailboxes and asynchronous queues.
-- [`bus_cell`](bus_cell/README.md): AXI4-Lite register access and an ordered AXI burst master with independent read/write capacities.
+  and provider wrappers, CDC mailboxes, asynchronous queues and
+  [AXI register and memory endpoints](common_cell/docs/bus.md).
 - `tech_cell/generic`: behavioral RAM providers implementing those contracts.
 - `common_cell/tests`: independent native tests selecting the generic providers.
 
@@ -26,8 +26,6 @@ The library does not download a compiler or change its consumer's toolchain.
 cd common_cell/tests
 VERYL_DUT_REUSE=0 veryl test
 cd ../../tech_cell/generic
-VERYL_DUT_REUSE=0 veryl test
-cd ../../bus_cell/tests
 VERYL_DUT_REUSE=0 veryl test
 ```
 

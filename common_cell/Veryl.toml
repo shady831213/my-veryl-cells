@@ -10,7 +10,7 @@ target = {type = "directory", path = "target"}
 
 [metadata.rtl_flow]
 entry = "constraints/ip.tcl"
-files = ["verification/cdc_custody.sv"]
+files = ["verification/cdc_custody.sv", "verification/ready_valid.sv"]
 
 [publish]
 register = false

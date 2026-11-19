@@ -81,9 +81,9 @@ module AxiMemoryRead::<
         next_result.protocol_error = accumulated.protocol_error || axi.rid != 0 || axi.rlast != (beat == head.length)
             || (axi.rresp as 2) == 1 || attributes.invalid;
     }
-    inst receipt: common_cell::ReadyValidSlice #(
+    inst receipt: ReadyValidSlice #(
         TYPE: M::Receipt                                 ,
-        MODE: common_cell::ReadyValid::SliceMode::Forward,
+        MODE: ReadyValid::SliceMode::Forward,
     ) (
         clk                    ,
         rst_n                  ,
