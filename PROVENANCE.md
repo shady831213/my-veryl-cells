@@ -22,3 +22,8 @@ native publishing/dependency metadata are adjusted.
 original `rtl` directory, not a complete hash of this repository's current files.
 No external checkout is needed to build the library. New qualification results
 are recorded separately; inherited downstream signoff is not transferred here.
+
+The AXI4-Lite and burst endpoints in `bus_cell` derive from the register frontend
+and read/write lanes in [PDMA's configurable DMA checkpoint](https://github.com/shady831213/pdma/tree/4c59e98e/rtl/src/dma).
+The shared endpoints carry an opaque tag and address attributes. The integrator
+provides the meaning of response USER bits.

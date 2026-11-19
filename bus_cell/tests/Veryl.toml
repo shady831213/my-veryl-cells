@@ -1,0 +1,14 @@
+[project]
+name = "bus_cell_tests"
+version = "0.1.0"
+
+[build]
+sources = ["src"]
+target = {type = "directory", path = "target"}
+
+[dependencies]
+bus_cell = {path = ".."}
+
+[test]
+seed = 20261119
+four_state = true

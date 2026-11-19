@@ -1,0 +1,39 @@
+// One register operation, with byte address, byte enables and data in the lanes of the selected 32/64-bit port.
+pub package RegisterBus::<ADDRESS_BITS: u32 = 32> {
+    struct Request {
+        write  : logic              ,
+        address: logic<ADDRESS_BITS>,
+        data   : logic<64>          ,
+        strobe : logic<8>           ,
+        wide   : logic              ,
+    }
+    struct Response {
+        data  : logic<64>,
+        status: logic<2> ,
+    }
+    const SUCCESS     : logic<2> = 2'b00;
+    const ACCESS_ERROR: logic<2> = 2'b10;
+    const UNMAPPED    : logic<2> = 2'b11;
+}
+
+pub interface RegisterPort #(
+    param REQUEST: type = RegisterBus::Request,
+) {
+    var request_valid : logic                ;
+    var request_ready : logic                ;
+    var request       : REQUEST              ;
+    var response_valid: logic                ;
+    var response_ready: logic                ;
+    var response      : RegisterBus::Response;
+    modport master {
+        request_valid : output,
+        request_ready : input ,
+        request       : output,
+        response_valid: input ,
+        response_ready: output,
+        response      : input ,
+    }
+    modport slave {
+        ..converse(master)
+    }
+}

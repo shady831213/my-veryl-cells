@@ -1,0 +1,112 @@
+// ID-zero reads may be outstanding together. Ordered R bursts consume the
+// metadata FIFO; only the final beat publishes a complete internal receipt.
+module AxiMemoryRead::<
+    B          : $std::axi4_prototype = $std::axi4_pkg::<64, 8, 1, 1, 1, 1, 1, 1>,
+    BURST_BEATS: u32                  = 8                  ,
+    TAG_BITS   : u32                  = 8                  ,
+    ATTR_BITS  : u32                  = 1                  ,
+> #(
+    param OUTSTANDING: u32 = 8,
+) (
+    clk       : input   clock                                                                                      ,
+    rst_n     : input   reset_async_low                                                                            ,
+    attributes: input   AxiResponse::Attributes                                                                    ,
+    port      : modport BurstPort::<B::ADDRESS_WIDTH, B::DATA_WIDTH_BYTES, BURST_BEATS, TAG_BITS, ATTR_BITS>::slave,
+    axi       : modport $std::axi4_if::<B>::read_master                                                            ,
+) {
+    alias package M = BurstMemory::<B::ADDRESS_WIDTH, B::DATA_WIDTH_BYTES, BURST_BEATS, TAG_BITS, ATTR_BITS>;
+    struct ReadTracker {
+        tag   : logic<TAG_BITS>      ,
+        lane  : logic<M::DATA_SIZE>  ,
+        size  : logic<3>             ,
+        length: logic<M::LENGTH_BITS>,
+    }
+    var full         : logic                      ;
+    var empty        : logic                      ;
+    var head         : ReadTracker                ;
+    var beat         : logic      <M::LENGTH_BITS>;
+    var accumulated  : M::Receipt                 ;
+    var next_result  : M::Receipt                 ;
+    var receipt_ready: logic                      ;
+    let lane         : logic      <M::DATA_SIZE>   = head.lane + ((beat as u32) << head.size);
+    let all_bits     : logic      <M::DATA_BITS>   = '1;
+    let beat_mask    : logic      <M::DATA_BITS>   = all_bits >> (M::DATA_BITS - (8 << head.size));
+    let terminal     : logic                       = axi.rvalid && axi.rready && axi.rlast;
+    assign axi.arvalid  = port.valid && !full;
+    assign port.ready   = axi.arready && !full;
+    assign axi.araddr   = port.request.address;
+    assign axi.arlen    = port.request.length as 8;
+    assign axi.arsize   = port.request.size as B::size_t;
+    assign axi.arburst  = 2'b01 as B::burst_t;
+    assign axi.aruser   = port.request.attributes as B::aruser_t;
+    assign axi.arcache  = 0;
+    assign axi.arprot   = 0;
+    assign axi.arid     = 0;
+    assign axi.arlock   = 0;
+    assign axi.arqos    = 0;
+    assign axi.arregion = 0;
+    assign axi.rready   = !empty && (!axi.rlast || receipt_ready);
+    inst pending: $std::fifo #(
+        TYPE         : ReadTracker,
+        DEPTH        : OUTSTANDING,
+        RESET_DATA_FF: false      ,
+    ) (
+        i_clk        : clk                       ,
+        i_rst        : rst_n                     ,
+        i_clear      : 0                         ,
+        o_empty      : empty                     ,
+        o_full       : full                      ,
+        o_almost_full: _                         ,
+        o_word_count : _                         ,
+        i_push       : axi.arvalid && axi.arready,
+        i_data       : ReadTracker'{
+            tag   : port.request.tag                    ,
+            lane  : port.request.address as M::DATA_SIZE,
+            size  : port.request.size                   ,
+            length: port.request.length
+        },
+        i_pop : terminal,
+        o_data: head    ,
+    );
+    always_comb {
+        next_result     = accumulated;
+        next_result.tag = head.tag;
+        // AXI lanes wrap at the bus word; the retained payload is densely packed.
+        next_result.data = accumulated.data | (((axi.rdata >> (lane * 8)) & beat_mask) as M::BURST_BITS)
+            << (((beat as u32) << head.size) << 3);
+        if (axi.rresp as 2) != 0 {
+            next_result.failed    = 1;
+            next_result.retryable = (!accumulated.failed || accumulated.retryable) && attributes.retryable;
+        }
+        next_result.protocol_error = accumulated.protocol_error || axi.rid != 0 || axi.rlast != (beat == head.length)
+            || (axi.rresp as 2) == 1 || attributes.invalid;
+    }
+    inst receipt: common_cell::ReadyValidSlice #(
+        TYPE: M::Receipt                                 ,
+        MODE: common_cell::ReadyValid::SliceMode::Forward,
+    ) (
+        clk                    ,
+        rst_n                  ,
+        s_valid : terminal     ,
+        s_ready : receipt_ready,
+        s_data  : next_result  ,
+        m_valid : port.returned,
+        m_ready : port.accepted,
+        m_data  : port.receipt ,
+        occupied: _            ,
+    );
+    always_ff (clk, rst_n) {
+        if_reset {
+            accumulated = '0;
+            beat        = 0;
+        } else if axi.rvalid && axi.rready {
+            if axi.rlast {
+                accumulated = '0;
+                beat        = 0;
+            } else {
+                accumulated =  next_result;
+                beat        += 1;
+            }
+        }
+    }
+}

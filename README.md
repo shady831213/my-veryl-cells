@@ -4,6 +4,7 @@ Reusable Veryl cells and their observable contracts. Native projects:
 
 - `common_cell`: typed slices, bounded selection, age ordering, RAM contracts
   and provider wrappers, acknowledged CDC mailboxes and asynchronous queues.
+- [`bus_cell`](bus_cell/README.md): AXI4-Lite register access and an ordered AXI burst master with independent read/write capacities.
 - `tech_cell/generic`: behavioral RAM providers implementing those contracts.
 - `common_cell/tests`: independent native tests selecting the generic providers.
 
@@ -13,7 +14,7 @@ selection, instance bindings and physical qualification. Loading a constraint
 package does not apply exceptions or waive findings. Optional resource declarations
 do not require a particular project flow or the `my-veryl` repository.
 
-Use a compatible Veryl compiler on PATH. Local development of the two packages
+Use a compatible Veryl compiler on PATH. Local development of the RAM contracts and providers
 uses native root dependency overrides and currently requires the temporary
 `0.22.1-generic-wide-struct-override` recipe from
 [my-veryl](https://github.com/shady831213/my-veryl), or an upstream compiler with
@@ -25,6 +26,8 @@ The library does not download a compiler or change its consumer's toolchain.
 cd common_cell/tests
 VERYL_DUT_REUSE=0 veryl test
 cd ../../tech_cell/generic
+VERYL_DUT_REUSE=0 veryl test
+cd ../../bus_cell/tests
 VERYL_DUT_REUSE=0 veryl test
 ```
 

@@ -1,0 +1,8 @@
+// Combinational interpretation of implementation-defined response sideband.
+// A retryable receipt requires every failing beat to be retryable.
+pub package AxiResponse {
+    struct Attributes {
+        retryable: logic,
+        invalid  : logic,
+    }
+}
