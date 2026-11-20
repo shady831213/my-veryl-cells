@@ -1,6 +1,6 @@
 [project]
 name = "tech_cell_generic"
-version = "0.1.0"
+version = "0.1.1"
 repository = "https://github.com/shady831213/my-veryl-cells"
 license = "MIT OR Apache-2.0"
 
@@ -9,7 +9,7 @@ sources = ["src"]
 target = {type = "directory", path = "target"}
 
 [dependencies]
-common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0"}
+common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.2.0"}
 
 [test]
 seed = 20260928
