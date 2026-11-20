@@ -7,8 +7,8 @@ sources = ["src"]
 target = {type = "directory", path = "target"}
 
 [dependencies]
-common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0", path = ".."}
-tech_cell_generic = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0", path = "../../tech_cell/generic"}
+common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.2.0", path = ".."}
+tech_cell_generic = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.1", path = "../../tech_cell/generic"}
 
 [test]
 defines = ["TEST_SUPPORT"]

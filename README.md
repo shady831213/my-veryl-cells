@@ -35,8 +35,8 @@ Consumers use the native published versions and commit their generated lockfile:
 
 ```toml
 [dependencies]
-common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0"}
-tech_cell_generic = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.0"}
+common_cell = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.2.0"}
+tech_cell_generic = {git = "https://github.com/shady831213/my-veryl-cells", version = "=0.1.1"}
 ```
 
 The common-cell test project explicitly overrides both packages to this checkout,
