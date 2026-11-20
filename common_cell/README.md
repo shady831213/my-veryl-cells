@@ -38,7 +38,7 @@ Paths inside those descriptions are relative to this common-cell project.
 
 | Cells | Contract |
 | --- | --- |
-| [`AxiLiteRegisterFrontend`, `AxiMemoryMaster`](docs/bus.md) | AXI4-Lite register access and ordered memory bursts with independent read/write credits |
+| [`AxiLiteRegisterFrontend`](docs/bus.md) | AXI4-Lite register access |
 | `ReadyValidSlice` | Typed single-clock Bypass/Forward/Reverse/Full transport |
 | `BoundedIndex`, `RoundRobin` | Pure bounded selection; ownership/cursor remain with caller |
 | `AgeOrder`, `AgeSelect` | Shared insertion-order history and pure selectors; callers own liveness |

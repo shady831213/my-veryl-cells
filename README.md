@@ -4,7 +4,7 @@ Reusable Veryl cells and their observable contracts. Native projects:
 
 - `common_cell`: typed slices, bounded selection, age ordering, RAM contracts
   and provider wrappers, CDC mailboxes, asynchronous queues and
-  [AXI register and memory endpoints](common_cell/docs/bus.md).
+  an [AXI4-Lite register frontend](common_cell/docs/bus.md).
 - `tech_cell/generic`: behavioral RAM providers implementing those contracts.
 - `common_cell/tests`: independent native tests selecting the generic providers.
 
